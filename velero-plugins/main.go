@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/fusor/openshift-migration-plugin/velero-plugins/migdeployment"
 	"github.com/fusor/openshift-migration-plugin/velero-plugins/migdeploymentconfig"
 	"github.com/fusor/openshift-migration-plugin/velero-plugins/migimagestream"
@@ -9,6 +10,7 @@ import (
 	"github.com/fusor/openshift-migration-plugin/velero-plugins/migpod"
 	"github.com/fusor/openshift-migration-plugin/velero-plugins/migpv"
 	"github.com/fusor/openshift-migration-plugin/velero-plugins/migpvc"
+	"github.com/fusor/openshift-migration-plugin/velero-plugins/migsa"
 	"github.com/fusor/openshift-velero-plugin/velero-plugins/build"
 	"github.com/fusor/openshift-velero-plugin/velero-plugins/common"
 	"github.com/fusor/openshift-velero-plugin/velero-plugins/cronjob"
@@ -52,6 +54,7 @@ func main() {
 		RegisterRestoreItemAction("openshift.io/14-statefulset-restore-plugin", newStatefulSetRestorePlugin).
 		RegisterRestoreItemAction("openshift.io/15-service-restore-plugin", newServiceRestorePlugin).
 		RegisterRestoreItemAction("openshift.io/16-cronjob-restore-plugin", newCronJobRestorePlugin).
+		RegisterRestoreItemAction("openshift.io/17-serviceaccount-backup-plugin", newServiceAccountBackupPlugin).
 		Serve()
 }
 
@@ -148,4 +151,22 @@ func newImageStreamRestorePlugin(logger logrus.FieldLogger) (interface{}, error)
 
 func newImageStreamTagRestorePlugin(logger logrus.FieldLogger) (interface{}, error) {
 	return &migimagestreamtag.RestorePlugin{Log: logger}, nil
+}
+
+func newServiceAccountBackupPlugin(logger logrus.FieldLogger) (interface{}, error) {
+	saBackupPlugin := &migsa.BackupPlugin{Log: logger}
+
+	fmt.Println("123123123")
+	fmt.Println(saBackupPlugin.SCCMap)
+	fmt.Println("123123123")
+
+	err := saBackupPlugin.InitSCCMap()
+	if err != nil {
+		fmt.Println("123123123")
+		fmt.Println(err)
+		fmt.Println("123123123")
+		return nil, err
+	}
+
+	return saBackupPlugin, nil
 }
